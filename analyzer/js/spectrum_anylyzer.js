@@ -24,7 +24,7 @@ var bar_height, bar_width = 2, num_bars = canvas.width / bar_width;
 
 // audio stuff
 var audio = new Audio();
-var audioSrc = 'Martin_Garrix_-_Animals.mp3';//Martin_Garrix_-_Animals.mp3'Bollywod-mix.mp3'; Tsunami (Bailatronic remix)
+var audioSrc = 'music/Martin_Garrix_-_Animals.mp3';
 audio.src = audioSrc;
 audio.controls = true;
 audio.autoplay = true;
@@ -34,15 +34,9 @@ audioVisual.appendChild(audio);
 document.getElementById('audio_file').onchange = function () {
     var files = this.files;
     var file = URL.createObjectURL(files[0]);
-    audio.src = file ? file : 'Tsunami-Bailatronic_remix.mp3';
+    audio.src = file ? file : 'music/Tsunami-Bailatronic_remix.mp3';
 };
-//Drow a circle
-var circle = function (c, x, y, r) {
-    c.beginPath();
-    c.arc(x, y, r, 0, 2 * Math.PI, false);
-    c.closePath();
-    c.fill();
-};
+
 
 // analyser stuff
 var context = new webkitAudioContext();
@@ -54,6 +48,14 @@ var source = context.createMediaElementSource(audio);
 source.connect(analyser);
 analyser.connect(context.destination);
 freqAnalyser();
+
+//Drow a circle
+var circle = function (c, x, y, r) {
+    c.beginPath();
+    c.arc(x, y, r, 0, 2 * Math.PI, false);
+    c.closePath();
+    c.fill();
+};
 
 //Oprate Particles
 var particles = [];
@@ -155,6 +157,7 @@ function freqAnalyser() {
         bar_height = -(data[i]);
         average = sum / bin_size;
         scaled_average = (average / 256) * canvas.height;
+        
         //find user selected method
         switch (method) {
             case "p":
@@ -192,7 +195,7 @@ function freqAnalyser() {
             case "sp":
                 for (var j = 0; j < num_bars; j++) {
                     i += 1;
-                    r = ((canvas.width + canvas.height) * 0.5) * (Math.cos((average / 2 + i) * (.05 + ((Math.sin(bar_height * 0.002) / Math.PI) * .4))) / Math.PI);
+                    r = ((canvas.width + canvas.height) * 0.5) * (Math.cos((average / 2 + i) * (.05 + ((Math.sin(bar_height * 10 * 0.0002) / Math.PI) * .4))) / Math.PI);
                     //canvas_context.fillRect(Math.sin(i) * r + (canvas.width / 2), Math.cos(i) * r + (canvas.height / 2), 2, 2);
                     x = Math.sin(i) * r + (canvas.width / 2);
                     y = Math.cos(i) * r + (canvas.height / 2);

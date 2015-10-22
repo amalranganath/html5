@@ -1,0 +1,54 @@
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>HTML5 Spectrum Analyzer | Audio to Canvas</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <style>
+            body { background: #000000; color: #ffffff; margin: 0}
+            #wrap { position: relative; padding : 0; margin : 1.2em auto; width : 80%; }
+
+            h1, h4 { text-align : center; margin: 0; }
+            h1{font-family: sans-serif; font-size: 1.5em}
+            h4 { margin-bottom : -1em; position : relative; bottom : 3em; }
+            div { display: block; }
+            #select-wrap{ position: absolute; right: 0; top: 5px}
+            #c { display : block; margin : 1em auto; padding: 1px; border : 1px solid #fff; }
+
+            #audio, #audio_file { margin : 0; width: 100% }
+            #audio_visual { position : relative; padding : .4em 0 1em; width : 50%; margin : 0 auto; }
+        </style>
+    </head>
+    <body>
+        <!--[if lt IE 8]>
+            <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
+        <![endif]-->
+        <div id="wrap">
+            <h1>HTML5 Spectrum Analyzer</h1>
+            <div id="select-wrap">
+                <label>Change Method </label>
+                <select id="analyze-method" name="method">
+                    <option value="stars">Stars</option>
+                    <option value="p">Particles</option>
+                    <!--<option value="w">Waves</option>-->
+                    <option value="sp">Sphere disco</option>
+                    <option value="f">Flower</option>
+                    <option value="cc">Circles</option>
+                    <option value="bb">Bubbles</option>
+                    <option value="s">Bars single</option>
+                    <option value="r">Bars single reverse</option>
+                    <option value="d">Bars dual </option>
+                    <option value="dr">Bars dual reverse</option>
+                    <option value="l">Lines</option>
+                    <option value="lr">Lines reverse</option>
+                </select>
+            </div>
+            <canvas id="c" width="800" height="480"></canvas>
+            <div id="audio_visual"> 
+                <input id="audio_file" type="file" accept="audio/*" /></div>
+            <!--<h4>You're browser needs to support HTML5 <span>Audio</span> and <span>webkitAudioContext</span></h4>-->
+        </div>
+        <script type="text/javascript" src="spectrum_anylyzer.js"></script>
+    </body>
+</html>

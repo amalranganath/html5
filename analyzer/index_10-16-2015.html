@@ -1,0 +1,231 @@
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>HTML5 Spectrum Analyzer | Audio to Canvas</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <style>
+            body { background: #000000; color: #ffffff; margin: 0}
+            #wrap { position: relative; padding : 0; margin : 2em auto; width : 80%; }
+
+            h1, h4 { text-align : center; }
+            h4 { margin-bottom : -1em; position : relative; bottom : 3em; }
+            div { display: block; }
+            #select-wrap{ position: absolute; right: 0; top: 40px}
+            #c { display : block; margin : 2em auto; padding: 1px; border : 1px solid #fff; }
+
+            #audio, #audio_file { margin : 0; width: 100% }
+            #audio_visual { position : relative; padding : .4em 0 1em; width : 50%; margin : 0 auto; }
+
+        </style>
+    </head>
+    <body>
+        <!--[if lt IE 8]>
+            <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
+        <![endif]-->
+        <div id="wrap">
+            <h1>HTML5 Spectrum Analyzer</h1>
+            <div id="select-wrap">
+                <label>Select a Method </label>
+                <select id="analyze-method" name="method">
+                    <option value="ln">Land</option>
+                    <option value="sp">Sphere disco</option>
+                    <option value="c">Sphere</option>
+                    <option value="bb">Bubbles</option>
+                    <option value="cc">Circles</option>
+                    <option value="s">Bars single</option>
+                    <option value="r">Bars single reverse</option>
+                    <option value="d">Bars dual </option>
+                    <option value="dr">Bars dual reverse</option>
+                    <option value="l">Lines</option>
+                    <option value="lr">Lines reverse</option>
+                </select>
+            </div>
+            <canvas id="c" width="700" height="400"></canvas>
+            <div id="audio_visual"> 
+                <input id="audio_file" type="file" accept="audio/*" /></div>
+            <!--<h4>You're browser needs to support HTML5 <span>Audio</span> and <span>webkitAudioContext</span></h4>-->
+        </div>
+        <script>
+            // Paul Irish requestAnimationFrame Polyfill
+            window.requestAnimFrame = (function () {
+                return  window.requestAnimationFrame ||
+                        window.webkitRequestAnimationFrame ||
+                        window.mozRequestAnimationFrame ||
+                        function (callback) {
+                            window.setTimeout(callback, 1000 / 60);
+                        };
+            })();
+
+            var audioVisual = document.getElementById('audio_visual');
+            //console.log(wrap);
+            // canvas stuff
+            var canvas = document.getElementById('c');
+            var analyze_method = document.getElementById('analyze-method');
+            var canvas_context = canvas.getContext('2d');
+
+            var bar_height, bar_width = 2, num_bars = canvas.width / bar_width;
+
+            // audio stuff
+            var audio = new Audio();
+            var audioSrc = 'Martin_Garrix_-_Animals.mp3';//Martin_Garrix_-_Animals.mp3'Bollywod-mix.mp3'; Tsunami (Bailatronic remix)
+            audio.src = audioSrc;
+            audio.controls = true;
+            audio.autoplay = true;
+            audio.id = 'audio';
+            audioVisual.appendChild(audio);
+            //Select a local file
+            document.getElementById('audio_file').onchange = function () {
+                var files = this.files;
+                var file = URL.createObjectURL(files[0]);
+                audio.src = file ? file : 'Tsunami-Bailatronic_remix.mp3';
+            };
+            //Drow a circle
+            var circle = function (c, x, y, r, s) {
+                c.beginPath();
+                c.arc(x, y, r, 0, 2 * Math.PI, false);
+                c.closePath();
+                if(s==null) c.fill();
+                else c.stroke();
+            };
+
+            // analyser stuff
+            var context = new webkitAudioContext();
+            var analyser = context.createAnalyser();
+            //analyser.fftSize = 2048;
+
+            // connect the stuff up to eachother
+            var source = context.createMediaElementSource(audio);
+            source.connect(analyser);
+            analyser.connect(context.destination);
+            freqAnalyser();
+
+            // draw the analyser to the canvas
+            function freqAnalyser() {
+                window.requestAnimFrame(freqAnalyser);
+                var sum, average, scaled_average;
+                var data = new Uint8Array(analyser.frequencyBinCount); //Uint8Array(2048);
+                var method = analyze_method.options[analyze_method.selectedIndex].value;
+                analyser.getByteFrequencyData(data);
+                // clear canvas
+                canvas_context.clearRect(0, 0, canvas.width, canvas.height);
+                var bin_size = Math.floor(data.length / num_bars);
+                //console.log(data);
+                firstpoint = true;
+                canvas_context.beginPath();
+                for (var i = 0; i < num_bars; i += 1) {
+                    sum = 0;
+                    for (var j = 0; j < bin_size; j += 1) {
+                        sum += data[(i * bin_size) + j];
+                    }
+                    bar_height = -(data[i]);
+                    average = sum / bin_size;
+                    //bar_width = 5; canvas.width / num_bars;
+                    scaled_average = (average / 256) * canvas.height;
+                    //console.log(bar_height);
+                    switch (method) {
+                        case "ln":
+                            //drawLand();
+                            //canvas_context.clearRect(0, 0, canvas.width, canvas.height);
+                            canvas_context.strokeStyle ="#fff";
+                            if (firstpoint)
+                            {
+                                canvas_context.moveTo(i*2, canvas.height-bar_height);
+                                firstpoint = false;
+                            }
+                            else
+                            {
+                                //console.log(-bar_height);
+                                canvas_context.lineTo(i*2, -bar_height);
+                            }
+                            //canvas_context.lineTo(i,3);
+                            canvas_context.stroke();
+                            break;
+                            
+                        case "sp":
+                            var x = i % 2 == 1 ? -i : i;
+                            canvas_context.fillStyle = 'rgba(0,255,255,.5)';
+                            canvas_context.globalCompositeOperation = 'lighter';
+                            for (var j = 0; j < num_bars; j++) {
+                                i += 1;
+                                r = ((canvas.width + canvas.height) * 0.5) * (Math.cos((average / 2 + i) * (.05 + ((Math.sin(bar_height * 10 * 0.0002) / Math.PI) * .4))) / Math.PI);
+                                //canvas_context.fillRect(Math.sin(i) * r + (canvas.width / 2), Math.cos(i) * r + (canvas.height / 2), 2, 2);
+                                circle(canvas_context, Math.sin(i) * r + (canvas.width / 2), Math.cos(i) * r + (canvas.height / 2), -bar_height / 50, false);
+                            }
+                            break;
+                        case "c":
+                            var x = i % 2 == 1 ? -i : i;
+                            canvas_context.fillStyle = 'rgba(0,155,255,.5)';
+                            canvas_context.globalCompositeOperation = 'lighter';
+                            for (var j = 0; j < num_bars; j++) {
+                                i += 1;
+                                r = ((canvas.width + canvas.height) * 0.5) * (Math.cos((sum + x / 2 + i) * (.05 + ((Math.sin(x / 10 * 0.00002) / Math.PI) * .2))) / Math.PI);
+                                //canvas_context.fillRect(Math.sin(i) * r + (canvas.width / 2), Math.cos(i) * r + (canvas.height / 2), 2, 2);
+                                circle(canvas_context, Math.sin(i) * r + (canvas.width / 2), Math.cos(i) * r + (canvas.height / 2), -bar_height / 50);
+                            }
+                            break;
+
+                        case "bb":
+                            var x = i % 2 == 1 ? -i : i;
+                            canvas_context.fillStyle = '#bbf74c';
+                            canvas_context.shadowColor = '#fff423';
+                            //canvas_context.globalCompositeOperation = 'lighter';
+                            canvas_context.shadowOffsetX = -bar_height * x / 50;
+                            canvas_context.shadowOffsetY = -bar_height / 10;
+                            canvas_context.shadowBlur = -bar_height / 10;
+
+                            circle(canvas_context, x * 10, canvas.height - bar_height, -bar_height / 20);
+                            circle(canvas_context, i * 5, -bar_height, -bar_height / 20);
+                            circle(canvas_context, canvas.width - i * 5, -bar_height, -bar_height / 20);
+                            circle(canvas_context, canvas.width - x * 10, -bar_height, -bar_height / 20);
+                            break;
+
+                        case "cc":
+                            var x = i % 2 == 1 ? -i : i;
+                            canvas_context.fillStyle = '#951cff';
+                            canvas_context.shadowColor = '#82f2ff';
+                            canvas_context.shadowOffsetX = -bar_height * x / 40;
+                            canvas_context.shadowOffsetY = -bar_height / 10;
+                            canvas_context.shadowBlur = -bar_height / 60;
+                            //circle(canvas_context, canvas.width/2 - x*2, canvas.height/2 - bar_height, scaled_average / 20);
+                            //circle(canvas_context, canvas.width / 2 - x * 2, i - bar_height, scaled_average / 20);
+                            circle(canvas_context, canvas.width / 2 - x * 2, i - (canvas.height / 3) - bar_height * 2, scaled_average / 40);
+                            break;
+
+                        case "s":
+                            canvas_context.fillRect(i * bar_width, canvas.height, bar_width - 1, -scaled_average);
+                            //canvas_context.fillRect(i * bar_width, scaled_average, bar_width - 1, -scaled_average);
+                            break;
+                        case "r":
+                            canvas_context.fillRect(i * bar_width, scaled_average, bar_width - 1, -scaled_average);
+                            //canvas_context.fillRect(i * bar_width , scaled_average , bar_width - 1 , scaled_average );
+                            break;
+                        case "d":
+                            //canvas_context.fillRect(i * bar_width, 0, bar_width - 1, scaled_average );
+                            canvas_context.fillRect(i * bar_width, scaled_average, bar_width - 1, -scaled_average);
+                            canvas_context.fillRect(i * bar_width, canvas.height, bar_width - 1, -scaled_average);
+                            break;
+                        case "dr":
+                            canvas_context.fillRect(i * bar_width, canvas.height / 2, bar_width - 1, -bar_height);
+                            canvas_context.fillRect(i * bar_width, canvas.height / 2, bar_width - 1, bar_height);
+                            //canvas_context.fillRect(i * bar_width, canvas.height / 2, bar_width - 1, scaled_average);
+                            //canvas_context.fillRect(i * bar_width, canvas.height / 2, bar_width - 1, -scaled_average);
+                            break;
+                        case "l":
+                            //canvas_context.fillRect(i * bar_width, canvas.height , bar_width - 1, bar_height );
+                            canvas_context.fillRect(i * bar_width, canvas.height + bar_height / 2 - scaled_average / 4, bar_width - 1, bar_height / 5);
+                            //canvas_context.fillRect(i * bar_width , canvas.height - scaled_average , bar_width -1 ,  -scaled_average/4);
+                            break;
+                        case "lr":
+                            canvas_context.fillRect(i * bar_width, average, bar_width - 1, average / 2);
+                            break;
+                    }
+
+                }
+
+            }
+        </script>
+    </body>
+
+</html>

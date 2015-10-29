@@ -5,6 +5,7 @@
 //@Author : Amal Ranganath
 //@Started Date : 21 April 2015
 //@Last Updated : 21 October 2015 (12:48 AM in the morning :D)
+//                29 October 2015
 //
 
 window.requestAnimFrame = (function () {
@@ -30,7 +31,7 @@ var bar_height, bar_width = 2, num_bars = canvas.width / bar_width;
 
 // audio stuff
 var audio = new Audio();
-var audioSrc = 'Tsunami-Bailatronic_remix.mp3';//Martin_Garrix_-_Animals.mp3'Bollywod-mix.mp3; Tsunami (Bailatronic remix)
+var audioSrc = 'music/Tsunami-Bailatronic_remix.mp3';//Martin_Garrix_-_Animals.mp3'Bollywod-mix.mp3; Tsunami (Bailatronic remix)
 audio.src = audioSrc;
 audio.controls = true;
 audio.autoplay = true;
@@ -40,7 +41,7 @@ audioVisual.appendChild(audio);
 document.getElementById('audio_file').onchange = function () {
     var files = this.files;
     var file = URL.createObjectURL(files[0]);
-    audio.src = file ? file : 'Martin_Garrix_-_Animals.mp3';
+    audio.src = file ? file : 'music/Martin_Garrix_-_Animals.mp3';
 };
 
 //Drow a circle

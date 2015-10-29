@@ -20,6 +20,9 @@ var audioVisual = document.getElementById('audio_visual');
 
 // canvas stuff
 var canvas = document.getElementById('c');
+console.log(document.getElementById('wrap').clientWidth);
+canvas.width = document.getElementById('wrap').clientWidth;
+canvas.height = document.getElementById('wrap').offsetHeight;
 var analyze_method = document.getElementById('analyze-method');
 var ctx = canvas.getContext('2d');
 
@@ -47,6 +50,12 @@ var circle = function (c, x, y, r) {
     c.closePath();
     c.fill();
 };
+var rand = function (d) {
+    if (d == true)
+        return 255;
+    else
+        return Math.floor(5 + Math.random() * 250);
+}
 var flash = {
     balls: [],
     hfov: 100 * Math.PI / 180,
@@ -68,7 +77,7 @@ var flash = {
                 r: 2,
                 vx: 2,
                 vy: 1,
-                color: "rgba(" + Math.floor(Math.random() * 255) + "," + Math.floor(Math.random() * 255) + "," + Math.floor(Math.random() * 255) + ", 0.8)"
+                color: "rgba(" + rand() + "," + rand() + "," + rand(true) + ", 0.8)"
             };
         }
         //console.log(this);
@@ -79,8 +88,8 @@ var flash = {
             //ctx.save();
             ctx.restore();
             this.find(i, data);
-            ctx.fillStyle = ball.color;
             ctx.beginPath();
+            ctx.fillStyle = ball.color;
             ctx.arc(ball.vx, ball.vy, ball.r, 0, Math.PI * 2, true);
             ctx.closePath();
             ctx.fill();
@@ -196,7 +205,7 @@ function freqAnalyser() {
     analyser.getByteFrequencyData(data);
     var first = true;
     // clear canvas
-    if (method == 'p' || method == 'stars') {
+    if (method == 'p' || method == 'stars'|| method == 'w') {
         // Fade out the particles slowly by drawing a rectangle over the entire canvas
         ctx.fillStyle = method == 'stars' ? 'rgba(0,0,0,0.06)' : 'rgba(0,0,0,0.1)';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -233,19 +242,19 @@ function freqAnalyser() {
 
             case "w":
                 //drawLand();
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                //ctx.clearRect(0, 0, canvas.width, canvas.height);
                 ctx.strokeStyle = "#fff";
                 if (first)
                 {
                     ctx.beginPath();
-                    ctx.moveTo(i * 2, -bar_height);
+                    ctx.moveTo(i * 2, average);
                     first = false;
                 }
-                else
+                else 
                 {
-                    ctx.lineTo(i * 2, -bar_height);
+                    ctx.lineTo(i*bar_width, average);
+                    ctx.stroke();
                 }
-                ctx.stroke();
                 break;
 
             case "sp":
@@ -264,7 +273,7 @@ function freqAnalyser() {
 
             case "f":
                 ctx.fillStyle = '#' + (Math.random() * 0x404040 + 0xcccccc | 0).toString(16);
-                ;
+
                 ctx.globalCompositeOperation = 'lighter';
                 for (var j = 0; j < num_bars; j++) {
                     i += 1;
